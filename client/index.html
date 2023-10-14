@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.png">
+
+</head>
+<body>
+  <!-- Main Wrapper -->
+  <div class="main-wrapper" id="main-wrapper">
+    <!-- Center Box -->
+    <div class="center-box" id="center-box">
+
+        <!-- Header Section of Main Box -->
+        <div class="box-header">
+          <div class="header-left">
+            <h2><b>Workout AI</b></h2>
+          </div>
+          <div class="header-right">
+            <img src="workoutAI.png">
+          </div>
+          
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area" id="input-area">
+            <!-- WorkoutAI Project Description -->
+            <p id="description">
+                Workout AI utilizes openAI API to create a workout program for you. Fill out the form and click 'Generate'
+                to create your workout program using AI technology!
+            </p>
+
+            <!-- Dropdown Options -->
+            <div class="dropdown-option">
+              <label for="primary-goal">What is your primary goal?</label>
+              <select id="primary-goal">
+                <option value="General Fitness and Health">General Fitness</option>
+                <option value="Build Muscle">Build Muscle</option>
+                <option value="Strength">Strength</option>
+                <option value="Cardiovascular Health">Cardiovascular Health</option>
+                <option value="Lose Weight">Lose Weight</option>
+              </select>
+            </div>
+
+            <br>
+            <div class="dropdown-option">
+              <label for="equipment">What equipment do you have available?</label>
+              <select id="equipment">
+                  <option value="Bodyweight">Bodyweight</option>
+                <option value="Free Weights">Free weights</option>
+                <option value="Machines">Machines</option>
+                <option value="Full Gym">Full gym</option>
+              </select>
+            </div>
+
+            <br>
+            <div class="dropdown-option">
+              <label for="days">How many days a week do you want to workout?</label>
+              <select id="days">
+                <option value="unsure">No clue</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+              </select>
+            </div>
+
+            <br>
+            <div class="dropdown-option">
+              <label for="experience">What is you workout experience?</label>
+              <select id="experience">
+                  <option value="Beginner (0-1 years)">Beginner | 0-1 years</option>
+                <option value="Intermediate (1-3 years)">Intermediate | 1-3 years</option>
+                <option value="Advanced (more than 3 years)">Advanced | 3+ years</option>
+              </select>
+            </div>
+
+            <br>
+            <div class="dropdown-option">
+              <label for="duration">Workout Duration preference?</label>
+              <select id="duration">
+                <option value="No time limit">None</option>
+                <option value="Under 1 hour">Under 1 hour</option>
+                <option value="60-90 minutes">60-90 minutes</option>
+                <option value="90-120 minutes">90-120 minutes</option>
+              </select>
+            </div>
+
+            <!-- Extra Information Input -->
+            <br>
+            <p>Extra Information that would help create a better workout for you? (Health conditions, current pains, etc.)</p>
+            <input type="text" id="extra-information" maxlength="100">
+
+            <!-- Generate Button -->
+            <div class="button-container">
+              <button id="generate">Generate</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- JavaScript File -->
+  <script src="script.js"></script>
+</body>
+</html>

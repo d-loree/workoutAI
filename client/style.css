@@ -1,0 +1,123 @@
+body {
+    font-family: Helvetica;
+    background-image: linear-gradient(rgb(205, 205, 205), rgb(109, 109, 109));
+}
+
+.main-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Center Display */
+.center-box {
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    border: 3px solid black;
+
+    background: rgb(255, 255, 255);
+    width: 500px;
+    min-height: 550px;
+}
+
+.input-area {
+    color: black;
+    padding-left: 15px;
+    padding-right: 15px;
+
+    display: flex;
+    flex-direction: column;
+    width: 470px;
+
+}
+
+#description {
+    padding-bottom: 20px;
+}
+
+/* Header */
+.box-header {
+    width: 100%;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.header-left {
+    width: 50%;
+}
+
+.header-right {
+    width: 50%;
+}
+
+.header-left h2 {
+    padding-left: 15px;
+}
+
+.header-right img {
+    width: 50px;
+    height: 50px;
+    float: right;
+    padding-right: 20px;
+}
+
+/* Textbox Input */
+#extra-information {
+    width: 100%;
+    text-align: start;
+}
+
+/* Button */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+button {
+    font-size: large;
+    color: white;
+
+    border: none;
+    background-color: black;
+    border-radius: 3px;
+
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+button:hover {
+    opacity: 70%;
+}
+
+/* Break Points */
+@media (max-width: 440px) {   /* 560px */
+    body {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 560px) { /* 700px */
+    .center-box {
+        width: 400px;
+    }
+
+    .input-area {
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 25px;
+        width: 90%;
+    }
+
+    #extra-information {
+        width: 100%;
+        text-align: start;
+    }
+}
