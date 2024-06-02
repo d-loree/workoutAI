@@ -3,10 +3,17 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 
-// Get openAI api key from .env file and put into easy API_KEY variable
+// Get openAI api key from .env file
 require('dotenv').config()
 
-// Import openai library and setup with API key
+const PORT = process.env.PORT;
+
+if (!process.env.OPENAI_API) {
+  console.error('Error: OpenAI API key not found in environment variables');
+  process.exit(1);
+}
+
+// Import openai setup with API key
 // Used OpenAI Node discussion for reference:
 // https://github.com/openai/openai-node/discussions/217
 const OpenAI = require('openai').default;
@@ -19,7 +26,8 @@ const MAX_TOKENS = 2000;
 
 // Set rate limiting variables
 const MAX_REQUESTS = 10; // Maximum requests per time window
-const TIME_WINDOW = 10 * 60 * 1000; // Set time window for max requests
+const TIME_WINDOW_IN_MINUTES = 10; // Time window in minutes
+const TIME_WINDOW = TIME_WINDOW_IN_MINUTES * 60 * 1000;
 const requestTimes = []; //create array to store request times in time window
 
 
@@ -27,7 +35,11 @@ const requestTimes = []; //create array to store request times in time window
 http.createServer(function (request, response) {
   let urlObject = url.parse(request.url, true, false)
 
-  
+  // Set CORS headers
+  response.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Allow specific methods
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow specific headers
+
   // handling generateButton request
   if (request.method === "POST" && urlObject.pathname === "/generateWorkout") {
     console.log("\nRECIEVED GENERATION REQUEST FROM CLIENT")
@@ -46,7 +58,13 @@ http.createServer(function (request, response) {
     
     // Get the data from the client and put into body
     let body = "";
-    request.on('data', (chunk) => { body += chunk; });
+    request.on('data', (chunk) => { 
+      body += chunk; 
+      // Limit request body size to 1MB
+      if (body.length > 1e6) {
+        request.destroy();
+      }
+    });
 
     request.on('end', async() => 
     {
@@ -73,12 +91,12 @@ http.createServer(function (request, response) {
             // User client form data to get GPT to create personal workout plan
             {"role": "user", "content": `
             Create a workout program using some of the following information.
-            Primary goal: ${receivedObject.primaryGoalText},
-            Equipment available to use: ${receivedObject.equipmentText},
-            Days per week: ${receivedObject.daysText},
-            Current experience level: ${receivedObject.experienceText},
-            Workout duration preference: ${receivedObject.timeText},
-            Extra information to help create a personalized workout program: ${receivedObject.informationFormText}
+            Primary goal: ${sanitizeInput(receivedObject.primaryGoalText)},
+            Equipment available to use: ${sanitizeInput(receivedObject.equipmentText)},
+            Days per week: ${sanitizeInput(receivedObject.daysText)},
+            Current experience level: ${sanitizeInput(receivedObject.experienceText)},
+            Workout duration preference: ${sanitizeInput(receivedObject.timeText)},
+            Extra information to help create a personalized workout program: ${sanitizeInput(receivedObject.informationFormText)}
             `}],
         });
         console.log("Response created, sending back to client.")
@@ -100,56 +118,47 @@ http.createServer(function (request, response) {
         response.end(JSON.stringify('Internal Server Error'));
       }
     });
-  }
-
-
-  // serving html pages to client
-  if (request.method === "GET") {
-    //handle GET requests as static file requests
+  } 
+  else if (request.method === "GET") { 
+    // serving html pages to client
     let filePath = "client" + urlObject.pathname
     if (urlObject.pathname === '/') filePath = "client" + '/index.html'
 
-
-    fs.readFile(filePath, function(error, data) 
-    {
-      if (error) 
+    try {
+      fs.readFile(filePath, function(error, data) 
       {
-        // report error to console
-        console.log('ERROR: ' + JSON.stringify(error))
-        // respond with not found 404 to client
-        response.writeHead(404)
-        response.end(JSON.stringify(error))
-        return
-      }
+        if (error) {
+          // report error to console
+          console.log('ERROR: ' + JSON.stringify(error))
+          // respond with not found 404 to client
+          response.writeHead(404)
+          response.end(JSON.stringify(error))
+          return
+        }
 
-    // Determine correct content type using file extension
-    var contentType;
-    switch (filePath.slice(((filePath.lastIndexOf(".") - 1) >>> 0) + 2)) 
-    {
-      case 'html':
-        contentType = 'text/html';
-        break;
-      case 'js':
-        contentType = 'text/javascript';
-        break;
-      case 'css':
-        contentType = 'text/css';
-        break;
-      default:
-        contentType = 'text/plain';
-      }
+        // Determine correct content type using file extension
+        let contentType = getContentType(filePath)
 
-      response.writeHead(200, { 'Content-Type': contentType })
-      response.end(data)
-    })
+        response.writeHead(200, { 'Content-Type': contentType })
+        response.end(data)
+      })
+    } catch (error) { 
+      console.log('ERROR: ' + JSON.stringify(error));
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ message: 'File Not Found' }));
+    }
   }
-}).listen(3000);
-console.log('Server Running on port 3000.');
-console.log('To test: http://localhost:3000/index.html');
+  else {
+    response.writeHead(405, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: 'Method Not Allowed' }));
+  }
+}).listen(PORT);
+console.log(`Server Running on port ${PORT}.`);
+console.log(`To test: http://localhost:${PORT}/index.html`);
 
 
 
-// Funciton to check if rate limit is being exceeded
+// Function to check if rate limit is being exceeded
 function isRateLimitHit() {
   const currentTime = Date.now()
   //Loop through request times, if its older then the time window, remove
@@ -164,3 +173,26 @@ function isRateLimitHit() {
   // If rate limit is not hit, return false
   return false; 
 }
+
+function sanitizeInput(input) {
+  return input.replace(/[^a-zA-Z0-9\s,.\-]/g, '');
+}
+
+function getContentType(filePath) {
+  const ext = filePath.split('.').pop();
+  const contentTypes = {
+    'html': 'text/html',
+    'js': 'text/javascript',
+    'css': 'text/css'
+  };
+  return contentTypes[ext] || 'text/plain';
+}
+
+// Global error handling
+process.on('uncaughtException', (err) => {
+  console.error(`Uncaught Exception: ${err}`);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+});
