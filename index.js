@@ -34,6 +34,11 @@ const requestTimes = []; //create array to store request times in time window
 http.createServer(function (request, response) {
   let urlObject = url.parse(request.url, true, false)
 
+  // Set CORS headers
+  response.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Allow specific methods
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Allow specific headers
+
   // handling generateButton request
   if (request.method === "POST" && urlObject.pathname === "/generateWorkout") {
     console.log("\nRECIEVED GENERATION REQUEST FROM CLIENT")
