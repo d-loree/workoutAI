@@ -3,12 +3,17 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 
-const PORT = 3000;
-
 // Get openAI api key from .env file
 require('dotenv').config()
 
-// Import openai library and setup with API key
+const PORT = process.env.PORT;
+
+if (!process.env.OPENAI_API) {
+  console.error('Error: OpenAI API key not found in environment variables');
+  process.exit(1);
+}
+
+// Import openai setup with API key
 // Used OpenAI Node discussion for reference:
 // https://github.com/openai/openai-node/discussions/217
 const OpenAI = require('openai').default;
