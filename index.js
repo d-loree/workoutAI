@@ -75,12 +75,12 @@ http.createServer(function (request, response) {
             // User client form data to get GPT to create personal workout plan
             {"role": "user", "content": `
             Create a workout program using some of the following information.
-            Primary goal: ${receivedObject.primaryGoalText},
-            Equipment available to use: ${receivedObject.equipmentText},
-            Days per week: ${receivedObject.daysText},
-            Current experience level: ${receivedObject.experienceText},
-            Workout duration preference: ${receivedObject.timeText},
-            Extra information to help create a personalized workout program: ${receivedObject.informationFormText}
+            Primary goal: ${sanitizeInput(receivedObject.primaryGoalText)},
+            Equipment available to use: ${sanitizeInput(receivedObject.equipmentText)},
+            Days per week: ${sanitizeInput(receivedObject.daysText)},
+            Current experience level: ${sanitizeInput(receivedObject.experienceText)},
+            Workout duration preference: ${sanitizeInput(receivedObject.timeText)},
+            Extra information to help create a personalized workout program: ${sanitizeInput(receivedObject.informationFormText)}
             `}],
         });
         console.log("Response created, sending back to client.")
@@ -151,7 +151,7 @@ console.log(`To test: http://localhost:${PORT}/index.html`);
 
 
 
-// Funciton to check if rate limit is being exceeded
+// Function to check if rate limit is being exceeded
 function isRateLimitHit() {
   const currentTime = Date.now()
   //Loop through request times, if its older then the time window, remove
@@ -165,4 +165,8 @@ function isRateLimitHit() {
 
   // If rate limit is not hit, return false
   return false; 
+}
+
+function sanitizeInput(input) {
+  return input.replace(/[^a-zA-Z0-9\s,.\-]/g, '');
 }
