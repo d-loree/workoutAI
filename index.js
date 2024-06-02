@@ -29,7 +29,6 @@ const requestTimes = []; //create array to store request times in time window
 http.createServer(function (request, response) {
   let urlObject = url.parse(request.url, true, false)
 
-  
   // handling generateButton request
   if (request.method === "POST" && urlObject.pathname === "/generateWorkout") {
     console.log("\nRECIEVED GENERATION REQUEST FROM CLIENT")
@@ -48,7 +47,13 @@ http.createServer(function (request, response) {
     
     // Get the data from the client and put into body
     let body = "";
-    request.on('data', (chunk) => { body += chunk; });
+    request.on('data', (chunk) => { 
+      body += chunk; 
+      // Limit request body size to 1MB
+      if (body.length > 1e6) {
+        request.destroy();
+      }
+    });
 
     request.on('end', async() => 
     {
@@ -102,12 +107,9 @@ http.createServer(function (request, response) {
         response.end(JSON.stringify('Internal Server Error'));
       }
     });
-  }
-
-
-  // serving html pages to client
-  if (request.method === "GET") {
-    //handle GET requests as static file requests
+  } 
+  else if (request.method === "GET") { 
+    // serving html pages to client
     let filePath = "client" + urlObject.pathname
     if (urlObject.pathname === '/') filePath = "client" + '/index.html'
 
@@ -129,6 +131,10 @@ http.createServer(function (request, response) {
       response.writeHead(200, { 'Content-Type': contentType })
       response.end(data)
     })
+  }
+  else {
+    response.writeHead(405, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ message: 'Method Not Allowed' }));
   }
 }).listen(PORT);
 console.log(`Server Running on port ${PORT}.`);
@@ -165,3 +171,12 @@ function getContentType(filePath) {
   };
   return contentTypes[ext] || 'text/plain';
 }
+
+// Global error handling
+process.on('uncaughtException', (err) => {
+  console.error(`Uncaught Exception: ${err}`);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+});
