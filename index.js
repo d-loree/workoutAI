@@ -3,7 +3,9 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 
-// Get openAI api key from .env file and put into easy API_KEY variable
+const PORT = 3000;
+
+// Get openAI api key from .env file
 require('dotenv').config()
 
 // Import openai library and setup with API key
@@ -143,9 +145,9 @@ http.createServer(function (request, response) {
       response.end(data)
     })
   }
-}).listen(3000);
-console.log('Server Running on port 3000.');
-console.log('To test: http://localhost:3000/index.html');
+}).listen(PORT);
+console.log(`Server Running on port ${PORT}.`);
+console.log(`To test: http://localhost:${PORT}/index.html`);
 
 
 
