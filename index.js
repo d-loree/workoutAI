@@ -114,8 +114,7 @@ http.createServer(function (request, response) {
 
     fs.readFile(filePath, function(error, data) 
     {
-      if (error) 
-      {
+      if (error) {
         // report error to console
         console.log('ERROR: ' + JSON.stringify(error))
         // respond with not found 404 to client
@@ -124,22 +123,8 @@ http.createServer(function (request, response) {
         return
       }
 
-    // Determine correct content type using file extension
-    var contentType;
-    switch (filePath.slice(((filePath.lastIndexOf(".") - 1) >>> 0) + 2)) 
-    {
-      case 'html':
-        contentType = 'text/html';
-        break;
-      case 'js':
-        contentType = 'text/javascript';
-        break;
-      case 'css':
-        contentType = 'text/css';
-        break;
-      default:
-        contentType = 'text/plain';
-      }
+      // Determine correct content type using file extension
+      let contentType = getContentType(filePath)
 
       response.writeHead(200, { 'Content-Type': contentType })
       response.end(data)
@@ -169,4 +154,14 @@ function isRateLimitHit() {
 
 function sanitizeInput(input) {
   return input.replace(/[^a-zA-Z0-9\s,.\-]/g, '');
+}
+
+function getContentType(filePath) {
+  const ext = filePath.split('.').pop();
+  const contentTypes = {
+    'html': 'text/html',
+    'js': 'text/javascript',
+    'css': 'text/css'
+  };
+  return contentTypes[ext] || 'text/plain';
 }
