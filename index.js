@@ -26,7 +26,8 @@ const MAX_TOKENS = 2000;
 
 // Set rate limiting variables
 const MAX_REQUESTS = 10; // Maximum requests per time window
-const TIME_WINDOW = 10 * 60 * 1000; // Set time window for max requests
+const TIME_WINDOW_IN_MINUTES = 10; // Time window in minutes
+const TIME_WINDOW = TIME_WINDOW_IN_MINUTES * 60 * 1000;
 const requestTimes = []; //create array to store request times in time window
 
 
@@ -123,24 +124,29 @@ http.createServer(function (request, response) {
     let filePath = "client" + urlObject.pathname
     if (urlObject.pathname === '/') filePath = "client" + '/index.html'
 
+    try {
+      fs.readFile(filePath, function(error, data) 
+      {
+        if (error) {
+          // report error to console
+          console.log('ERROR: ' + JSON.stringify(error))
+          // respond with not found 404 to client
+          response.writeHead(404)
+          response.end(JSON.stringify(error))
+          return
+        }
 
-    fs.readFile(filePath, function(error, data) 
-    {
-      if (error) {
-        // report error to console
-        console.log('ERROR: ' + JSON.stringify(error))
-        // respond with not found 404 to client
-        response.writeHead(404)
-        response.end(JSON.stringify(error))
-        return
-      }
+        // Determine correct content type using file extension
+        let contentType = getContentType(filePath)
 
-      // Determine correct content type using file extension
-      let contentType = getContentType(filePath)
-
-      response.writeHead(200, { 'Content-Type': contentType })
-      response.end(data)
-    })
+        response.writeHead(200, { 'Content-Type': contentType })
+        response.end(data)
+      })
+    } catch (error) { 
+      console.log('ERROR: ' + JSON.stringify(error));
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ message: 'File Not Found' }));
+    }
   }
   else {
     response.writeHead(405, { 'Content-Type': 'application/json' });
